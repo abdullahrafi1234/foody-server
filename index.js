@@ -29,6 +29,19 @@ async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
+
+        const foodsCollection = client.db('foodDB').collection('food')
+
+        // foods
+        app.post('/addFood', async(req, res) => {
+            const food = req.body
+            console.log(food);
+            const result = await foodsCollection.insertOne(food)
+            res.send(result)
+        })
+
+
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
