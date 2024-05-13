@@ -28,11 +28,19 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
         const foodsCollection = client.db('foodDB').collection('food')
 
+
         // foods
+        app.get('/addFood', async(req,res) => {
+            const cursor = foodsCollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+
+
         app.post('/addFood', async(req, res) => {
             const food = req.body
             console.log(food);
