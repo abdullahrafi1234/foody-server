@@ -59,6 +59,16 @@ async function run() {
         })
 
 
+        //get my foods request 
+        app.get('/request/:email', async(req, res) => {
+            const email = req.params.email
+            const query = {email: email}
+            const result = await requestCollection.find(query).toArray()
+            res.send(result)
+        })
+
+
+
         //request 
         app.post('/request', async(req, res) => {
             const request = req.body
