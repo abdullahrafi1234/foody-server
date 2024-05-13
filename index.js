@@ -75,6 +75,39 @@ async function run() {
             res.send(result)
         })
 
+        //update food
+        app.put('/addFood/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updatedFood = req.body
+            const updated = {
+                $set: {
+                    foodName: updatedFood.foodName,
+                    quantity: updatedFood.quantity,
+                    location: updatedFood.location,
+                    date: updatedFood.date,
+                    notes: updatedFood.notes,
+                    status: updatedFood.status,
+                    photo: updatedFood.photo,
+
+                }
+            }
+            const result = await foodsCollection.updateOne(filter, updated,options)
+            res.send(result)
+
+        })
+
+
+
+        //delete food
+        app.delete('/addFood/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await foodsCollection.deleteOne(query)
+            res.send(result)
+        })
+
 
 
         // Send a ping to confirm a successful connection
