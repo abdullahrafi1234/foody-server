@@ -49,6 +49,16 @@ async function run() {
             res.send(result)
         })
 
+
+        //get my foods in table
+        app.get('/addFoods/:email', async(req, res) => {
+            const email = req.params.email
+            const query = {email: email}
+            const result = await foodsCollection.find(query).toArray()
+            res.send(result)
+        })
+
+
         //request 
         app.post('/request', async(req, res) => {
             const request = req.body
