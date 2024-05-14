@@ -14,6 +14,7 @@ app.use(cors({
     credentials: true
 }))
 app.use(express.json())
+app.use(cookieParser());
 
 
 
@@ -40,7 +41,7 @@ async function run() {
 
 
         //jwt create 
-        app.post('/jwt', async(req, res) => {
+        app.post('/jwt', async (req, res) => {
             const user = req.body
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: '7d'
@@ -50,39 +51,54 @@ async function run() {
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
             })
-            .send({success: true})
+                .send({ success: true })
+        })
+
+        //clear token in logout
+        app.get('/logout', (req, res) => {
+            const user = req.body
+            console.log(user)
+
+            res
+                .clearCookie('token', {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+                    maxAge: 0
+                })
+                .send({ success: true })
         })
 
 
         // foods
-        app.get('/addFood', async(req,res) => {
+        app.get('/addFood', async (req, res) => {
             const cursor = foodsCollection.find()
             const result = await cursor.toArray()
             res.send(result)
         })
 
 
-        app.get('/addFood/:id', async(req, res) => {
+        app.get('/addFood/:id', async (req, res) => {
             const id = req.params.id
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await foodsCollection.findOne(query)
             res.send(result)
         })
 
 
         //get my foods in table
-        app.get('/addFoods/:email', async(req, res) => {
+        app.get('/addFoods/:email', async (req, res) => {
             const email = req.params.email
-            const query = {email: email}
+            const query = { email: email }
             const result = await foodsCollection.find(query).toArray()
             res.send(result)
         })
 
 
         //get my foods request 
-        app.get('/request/:email', async(req, res) => {
+        app.get('/request/:email', async (req, res) => {
             const email = req.params.email
-            const query = {email: email}
+            const query = { email: email }
             const result = await requestCollection.find(query).toArray()
             res.send(result)
         })
@@ -90,15 +106,17 @@ async function run() {
 
 
         //request 
-        app.post('/request', async(req, res) => {
+        app.post('/request', async (req, res) => {
             const request = req.body
             const result = await requestCollection.insertOne(request)
             res.send(result)
         })
 
-        
+
         // add food
-        app.post('/addFood', async(req, res) => {
+        app.post('/addFood', async (req, res) => {
+            const token = req.cookies?.token 
+            console.log(token)
             const food = req.body
             console.log(food);
             const result = await foodsCollection.insertOne(food)
@@ -123,21 +141,21 @@ async function run() {
 
                 }
             }
-            const result = await foodsCollection.updateOne(filter, updated,options)
+            const result = await foodsCollection.updateOne(filter, updated, options)
             res.send(result)
 
         })
 
 
         //update food status
-        app.patch('/addFood/:id', async(req, res) => {
+        app.patch('/addFood/:id', async (req, res) => {
             const id = req.params.id
             const status = req.body
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const updateStatus = {
                 $set: status,
             }
-            const result = await foodsCollection.updateOne(query,updateStatus)
+            const result = await foodsCollection.updateOne(query, updateStatus)
             res.send(result)
         })
 
@@ -156,7 +174,7 @@ async function run() {
         // Send a ping to confirm a successful connection
         // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    } 
+    }
     finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
