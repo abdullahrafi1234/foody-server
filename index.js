@@ -109,6 +109,19 @@ async function run() {
         })
 
 
+        //update food status
+        app.patch('/addFood/:id', async(req, res) => {
+            const id = req.params.id
+            const status = req.body
+            const query = {_id: new ObjectId(id)}
+            const updateStatus = {
+                $set: status,
+            }
+            const result = await foodsCollection.updateOne(query,updateStatus)
+            res.send(result)
+        })
+
+
 
         //delete food
         app.delete('/addFood/:id', async (req, res) => {
