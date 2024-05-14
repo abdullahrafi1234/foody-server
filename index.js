@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser')
 //for .env file
 require('dotenv').config()
 const app = express()
@@ -7,7 +9,10 @@ const port = process.env.PORT || 5000;
 
 
 // middleware
-app.use(cors())
+app.use(cors({
+    origin: ['http://localhost:5173'],
+    credentials: true
+}))
 app.use(express.json())
 
 
@@ -32,6 +37,21 @@ async function run() {
 
         const foodsCollection = client.db('foodDB').collection('food')
         const requestCollection = client.db('foodDB').collection('request')
+
+
+        //jwt create 
+        app.post('/jwt', async(req, res) => {
+            const user = req.body
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '7d'
+            })
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+            })
+            .send({success: true})
+        })
 
 
         // foods
