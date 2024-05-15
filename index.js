@@ -115,8 +115,6 @@ async function run() {
 
         // add food
         app.post('/addFood', async (req, res) => {
-            const token = req.cookies?.token 
-            console.log(token)
             const food = req.body
             console.log(food);
             const result = await foodsCollection.insertOne(food)
