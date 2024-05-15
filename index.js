@@ -10,12 +10,14 @@ const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors({
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173',
+        'https://eleven-assignment-4cccf.web.app',
+        'https://eleven-assignment-4cccf.firebaseapp.com'
+    ],
     credentials: true
 }))
 app.use(express.json())
 app.use(cookieParser());
-
 
 
 
@@ -30,6 +32,12 @@ const client = new MongoClient(uri, {
         deprecationErrors: true,
     }
 });
+
+const cookieOption = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production' ? true : false,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+}
 
 async function run() {
     try {
@@ -46,11 +54,8 @@ async function run() {
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: '7d'
             })
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
-            })
+            res
+                .cookie('token', token, cookieOption)
                 .send({ success: true })
         })
 
@@ -60,12 +65,7 @@ async function run() {
             console.log(user)
 
             res
-                .clearCookie('token', {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-                    maxAge: 0
-                })
+                .clearCookie('token', { ...cookieOption, maxAge: 0 })
                 .send({ success: true })
         })
 
